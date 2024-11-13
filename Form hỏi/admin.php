@@ -11,14 +11,15 @@ if (!isset($_SESSION["user"])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>Trang quản lý câu hỏi</title>
 </head>
 <body>
-    <div class="header">Quản trị câu hỏi khảo sát</div>
+    <div class="header" id="cautieude">Quản trị câu hỏi khảo sát</div>
     <div class="sidebar">
         <a href="#">Dashboard</a>
         <a href="#">Quản lý Câu hỏi</a>
-        <a href="#">Kết quả Khảo sát</a>
+        <a onclick="ketqua()">Kết quả Khảo sát</a>
         <a href="#">Cài đặt</a>
         <a href="#">
           <form action="xldangxuat.php" method="POST">
@@ -28,6 +29,7 @@ if (!isset($_SESSION["user"])) {
     </div>
 
     <div class="content">
+      <div id="quanlycauhoi">
         <h2>Quản lý Câu hỏi</h2>
         <button class="btn" onclick="openModal('add')">Thêm Câu hỏi</button>
 
@@ -131,13 +133,17 @@ if (!isset($_SESSION["user"])) {
               </form>
               
           </div>
-      </div>
+        </div>
             <!-- /Modal Sửa câu hỏi -->
+        </div>
+        <div id="charts">
+        <!-- Các biểu đồ sẽ được tạo ở đây -->
+      </div>
 
-
-</div>
-
-    
+   <?php 
+    include 'laydulieutaobieudo.php';
+    include 'taobieudo.php';
+    ?>  
 
   <script>
     //Modal thêm câu hỏi
@@ -213,6 +219,20 @@ function confirmDelete(MaCauHoi) {
       }
     }
   </script>
-  
+  <style>
+        .chart-container {
+          width: 30%;  /* Điều chỉnh chiều rộng của mỗi biểu đồ */
+        margin: 20px auto;  /* Đặt khoảng cách giữa các div chứa biểu đồ */
+        padding: 20px;  /* Khoảng cách bên trong div */
+        border: 2px solid #ddd;  /* Viền bao quanh mỗi biểu đồ */
+        border-radius: 8px;  /* Tạo góc bo tròn cho viền */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* Thêm hiệu ứng bóng cho viền */
+        text-align: center;
+        background-color: #f9f9f9;  /* Màu nền của div */
+        }
+        .chart-container h3 {
+        margin-bottom: 5px;  /* Khoảng cách giữa tiêu đề và biểu đồ */
+    }
+    </style>
 </body>
 </html>
