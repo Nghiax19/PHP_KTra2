@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 INSERT INTO nguoidung_traloi (MaNguoiDung, MaCauTraLoi) 
                 SELECT '$userId', MaCauTraLoi
                 FROM cautraloi
-                WHERE MaCauHoi IN (1, 2, 3)";  // Giả sử bạn có 3 câu hỏi, thay đổi MaCauHoi tương ứng với số câu hỏi thực tế
+                WHERE MaCauHoi IN ('CH1','CH2', 'CH3')";  // Giả sử bạn có 3 câu hỏi, thay đổi MaCauHoi tương ứng với số câu hỏi thực tế
 
             if ($conn->query($sqlInsertAnswers) === TRUE) {
                 // Debugging: Kiểm tra có vào được phần này không
