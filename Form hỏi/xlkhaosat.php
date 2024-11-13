@@ -19,12 +19,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $gender = $_POST['gender'];
     $ipAddress = $_SERVER['REMOTE_ADDR'];  // Lấy địa chỉ IP của người dùng
 
-    // Kiểm tra xem email hoặc IP đã từng tham gia khảo sát chưa
-    $checkUser = "SELECT * FROM nguoidung WHERE Email = '$email' OR DiaChiIP = '$ipAddress'";
+    // Kiểm tra xem email đã từng tham gia khảo sát chưa
+    $checkUser = "SELECT * FROM nguoidung WHERE Email = '$email'";
     $result = $conn->query($checkUser);
 
+    // Debugging: Kiểm tra kết quả query
+    if (!$result) {
+        die("Lỗi truy vấn: " . $conn->error);
+    }
+
     if ($result->num_rows > 0) {
-        // Nếu email hoặc IP đã tham gia khảo sát
+        // Nếu email đã tham gia khảo sát
         echo "<script>alert('Bạn đã tham gia khảo sát rồi.'); window.location.href = 'trang1.php';</script>";
     } else {
         // Nếu chưa tham gia, thêm thông tin người dùng vào bảng nguoidung
@@ -43,9 +48,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 INSERT INTO nguoidung_traloi (MaNguoiDung, MaCauTraLoi) 
                 SELECT '$userId', MaCauTraLoi
                 FROM cautraloi
-                WHERE MaCauHoi IN (1, 2, 3, 4)";  // Giả sử bạn có 4 câu hỏi, thay đổi MaCauHoi tương ứng
+                WHERE MaCauHoi IN (1, 2, 3)";  // Giả sử bạn có 3 câu hỏi, thay đổi MaCauHoi tương ứng với số câu hỏi thực tế
 
             if ($conn->query($sqlInsertAnswers) === TRUE) {
+                // Debugging: Kiểm tra có vào được phần này không
                 echo "<script>alert('Cảm ơn bạn đã tham gia khảo sát!'); window.location.href = 'trang1.php';</script>";
             } else {
                 echo "<script>alert('Lỗi khi lưu câu trả lời: " . $conn->error . "'); window.location.href = 'trang1.php';</script>";
