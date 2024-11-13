@@ -148,21 +148,22 @@
             while ($row = $result->fetch_assoc()) {
                 echo "<label for='" . $row['MaCauHoi'] . "'>" . $row['NoiDungCH'] . ":</label><br>";
 
-                if ($row['MaCauHoi'] == 'CH2') { // Câu hỏi tuổi
-                    echo "<select name='age' id='age'>
-                            <option value='under_18'>Dưới 18</option>
-                            <option value='18_24'>18 - 24</option>
-                            <option value='25_34'>25 - 34</option>
-                            <option value='35_44'>35 - 44</option>
-                            <option value='45_54'>45 - 54</option>
-                            <option value='55_up'>55 trở lên</option>
-                          </select><br><br>";
-                } elseif ($row['MaCauHoi'] == 'CH3') { // Câu hỏi giới tính
-                    echo "<select name='gender' id='gender'>
-                            <option value='male'>Nam</option>
-                            <option value='female'>Nữ</option>
-                            <option value='other'>Khác</option>
-                          </select><br><br>";
+                if ($row['MaCauHoi'] == 'CH2') { // Câu hỏi về độ tuổi
+                    $age_sql = "SELECT NoiDungCTL FROM cautraloi WHERE MaCauHoi = 'CH2'";
+                    $age_result = $conn->query($age_sql);
+                    echo "<select name='age' id='age'>";
+                    while ($age_row = $age_result->fetch_assoc()) {
+                        echo "<option value='" . strtolower($age_row['NoiDungCTL']) . "'>" . $age_row['NoiDungCTL'] . "</option>";
+                    }
+                    echo "</select><br><br>";
+                } elseif ($row['MaCauHoi'] == 'CH3') { // Câu hỏi về giới tính
+                    $gender_sql = "SELECT NoiDungCTL FROM cautraloi WHERE MaCauHoi = 'CH3'";
+                    $gender_result = $conn->query($gender_sql);
+                    echo "<select name='gender' id='gender'>";
+                    while ($gender_row = $gender_result->fetch_assoc()) {
+                        echo "<option value='" . strtolower($gender_row['NoiDungCTL']) . "'>" . $gender_row['NoiDungCTL'] . "</option>";
+                    }
+                    echo "</select><br><br>";
                 } else { // Câu hỏi email
                     echo "<input type='email' name='email' id='email' required><br><br>";
                 }
