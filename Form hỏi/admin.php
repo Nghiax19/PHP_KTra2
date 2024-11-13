@@ -1,10 +1,11 @@
-<?php
+<?php 
 session_start(); 
 if (!isset($_SESSION["user"])) {
     header("Location: login.html");
     exit();
 }
-?><!DOCTYPE html>
+?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -29,65 +30,181 @@ if (!isset($_SESSION["user"])) {
     <div class="content">
         <h2>Quản lý Câu hỏi</h2>
         <button class="btn" onclick="openModal('add')">Thêm Câu hỏi</button>
-        <table class="table">
-          <tr>
-            <th>STT</th>
-            <th>Câu hỏi</th>
-            <th>Loại câu trả lời</th>
-            <th>Hành động</th>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>Bạn có hài lòng với dịch vụ của chúng tôi?</td>
-            <td>Trắc nghiệm</td>
-            <td>
-              <button class="btn" onclick="openModal('edit')">Sửa</button>
-              <button class="btn" onclick="deleteQuestion()">Xóa</button>
-            </td>
-          </tr>
-          <!-- Thêm nhiều dòng câu hỏi tại đây -->
-        </table>
-    </div>
 
-    <!-- Modal thêm và sửa câu hỏi -->
-<div id="modal" class="modal">
-    <div class="modal-content">
-      <h3 id="modalTitle">Thêm Câu hỏi</h3>
-      <label>Câu hỏi:</label><br>
-      <input type="text" id="questionInput" style="width: 100%;"><br><br>
-      <label>Loại câu trả lời:</label><br>
-      <select id="answerType">
-        <option value="Trắc nghiệm">Trắc nghiệm</option>
-        <option value="Tự luận">Tự luận</option>
-        <option value="Đa lựa chọn">Đa lựa chọn</option>
-      </select><br><br>
-      <button class="btn" onclick="saveQuestion()">Lưu</button>
-      <button class="btn" onclick="closeModal()">Hủy</button>
-    </div>
-  </div>
+                <!-- Modal thêm câu hỏi -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+              <h3 id="modalTitle">Thêm Câu hỏi</h3>
+              <form method="POST" action="xlthemcauhoi.php">
+              <label>Nội dung câu hỏi</label><br>
+              <input type="text" name="noidungch" style="width: 100%;"><br><br>
+              <label>Loai cau hoi</label><br>
+              <input type="text" name="loaich" style="width: 100%;"><br><br>
+                <!-- Phần thêm câu trả lời -->
+                  <label>Câu trả lời</label><br>
+                  <div id="answersContainer">
+                      <div class="answer">
+                          <input type="text" name="answers[]" placeholder="Câu trả lời 1" style="width: 100%;"><br><br>
+                      </div>
+                  </div>
+                  <button type="button" onclick="addAnswer()">Thêm câu trả lời</button><br><br>
+                <!-- /Phần thêm câu trả lời -->
+              <button class="btn" type="submit">Lưu</button>
+              <button class="btn" type="button" onclick="closeModal()">Hủy</button>
+            </form>
+                
+              
+            </div>
+          </div>
+
+          <!-- Hiển thị bảng câu hỏi lên đây --> 
+        <table class="table">
+            <tr>
+                <th>STT</th>
+                <th>Mã câu hỏi</th>
+                <th>Nội dung câu hỏi</th>
+                <th>Câu trả lời</th>
+                <th>Loại câu hỏi</th>
+                <th></th>
+            </tr>
+            
+            <?php
+            // Kết nối cơ sở dữ liệu
+            include('connect.inp');
+
+            // Truy vấn lấy tất cả câu hỏi từ bảng cauhoi và các câu trả lời từ bảng cautraloi
+            $query = "
+                SELECT c.MaCauHoi, c.NoiDungCH, c.LoaiCH, GROUP_CONCAT(ct.NoiDungCTL SEPARATOR ', ') as CacCauTraLoi
+                FROM cauhoi c
+                LEFT JOIN cautraloi ct ON c.MaCauHoi = ct.MaCauHoi
+                GROUP BY c.MaCauHoi, c.NoiDungCH, c.LoaiCH
+            ";
+
+            $result = $con->query($query);
+            $stt = 1; // Biến đếm cho cột STT
+
+            // Kiểm tra và hiển thị dữ liệu từ bảng cauhoi
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr>";
+                    echo "<td>" . $stt++ . "</td>"; // Tăng STT tự động
+                    echo "<td>" .$row['MaCauHoi'] . "</td>";
+                    echo "<td>" .$row['NoiDungCH']. "</td>";
+                    echo "<td>" .$row['CacCauTraLoi']. "</td>";
+                    echo "<td>" .$row['LoaiCH']. "</td>";
+                    echo "<td>
+                            <button class='btn' onclick=\"openEditModal('{$row['MaCauHoi']}')\">Sửa</button>
+                            <button class='btn' onclick=\"confirmDelete('{$row['MaCauHoi']}')\">Xóa</button>
+                          </td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='5'>Không có câu hỏi nào</td></tr>";
+            }
+
+            // Đóng kết nối
+            $con->close();
+            ?>
+        </table>
+
+      <!-- Modal Sửa câu hỏi -->
+      <div id="Modalsua" class="modal">
+          <div class="modal-content">
+            <h3 id="modalTitle">Sửa câu hỏi</h3>
+              <form id="editQuestionForm" method="POST" action="xlsuacauhoi.php">
+              <input type="hidden" id="MaCauHoi" name="MaCauHoi">
+                <label for="editNoiDungCH">Nội dung câu hỏi</label><br>
+                <input id="editNoiDungCH" name="editNoiDungCH" style="width: 100%;"><br><br>
+                <label for="editLoaiCH">Loại câu hỏi</label><br>
+                <input type="text" id="editLoaiCH" name="editLoaiCH" style="width: 100%;"><br><br>
+                <label for="editNoiDungCTL">Câu trả lời</label><br>
+                <!-- Phần thêm câu trả lời -->
+            <div id="answersContainersua">
+                <div class="answersua">
+                    <input type="text" name="answersua[]" placeholder="Câu trả lời 1" style="width: 100%;"><br><br>
+                </div>
+            </div>
+            <button type="button" onclick="addAnswersua()">Thêm câu trả lời</button><br><br>
+            <!-- /Phần thêm câu trả lời -->
+                  <button type="submit" class="btn">Lưu</button>
+                  <button type="button" class="btn" onclick="closesua()">Hủy</button>
+              </form>
+              
+          </div>
+      </div>
+            <!-- /Modal Sửa câu hỏi -->
+
+
+</div>
+
+    
 
   <script>
+    //Modal thêm câu hỏi
     function openModal(action) {
       document.getElementById('modal').style.display = 'block';
       document.getElementById('modalTitle').innerText = action === 'add' ? 'Thêm Câu hỏi' : 'Sửa Câu hỏi';
     }
-  
+    //Thêm câu hỏi
+    function addAnswer() {
+    var answersContainer = document.getElementById('answersContainer');
+    var newAnswer = document.createElement('div');
+    newAnswer.classList.add('answer');
+    newAnswer.innerHTML = '<input type="text" name="answers[]" placeholder="Câu trả lời mới" style="width: 100%;"><br><br>';
+    answersContainer.appendChild(newAnswer);
+}
+
     function closeModal() {
-      document.getElementById('modal').style.display = 'none';
+        document.getElementById('modal').style.display = 'none';
     }
   
-    function saveQuestion() {
-      // Thêm logic lưu câu hỏi ở đây
-      alert('Câu hỏi đã được lưu!');
-      closeModal();
+
+    // Hàm mở modal và hiển thị dữ liệu câu hỏi
+function openEditModal(MaCauHoi) {
+    // Gửi yêu cầu AJAX để lấy dữ liệu câu hỏi
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'nhapttmodal.php?MaCauHoi=' + MaCauHoi, true);
+    xhr.onload = function() {
+        if (xhr.status == 200) {
+            var response = JSON.parse(xhr.responseText);
+
+            if (response.error) {
+                alert(response.error);
+                return;
+            }
+
+            // Điền dữ liệu vào các trường trong modal
+            document.getElementById('MaCauHoi').value = response.MaCauHoi;
+            document.getElementById('editNoiDungCH').value = response.NoiDungCH;
+            document.getElementById('editLoaiCH').value = response.LoaiCH;
+
+            // Mở modal
+            document.getElementById('Modalsua').style.display = 'block';
+        }
+    };
+    xhr.send();
+}
+
+  // Hàm thêm câu trả lời mới
+function addAnswersua() {
+    var newAnswer = document.createElement('div');
+    newAnswer.classList.add('answersua');
+    newAnswer.innerHTML = '<input type="text" name="answersua[]" placeholder="Câu trả lời mới" style="width: 100%;"><br><br>';
+    document.getElementById('answersContainersua').appendChild(newAnswer);
+}
+    
+function closesua() {
+        document.getElementById('Modalsua').style.display = 'none';
     }
-  
-    function deleteQuestion() {
-      // Thêm logic xóa câu hỏi ở đây
-      if (confirm('Bạn có chắc muốn xóa câu hỏi này không?')) {
-        alert('Câu hỏi đã được xóa!');
-      }
+
+
+  // Nút Xóa
+function confirmDelete(MaCauHoi) {
+    if (confirm("Bạn có chắc chắn muốn xóa không?")) {
+        // Nếu bấm OK, sẽ gọi xóa câu hỏi với MaCauHoi tương ứng
+        window.location.href = 'xlxoacauhoi.php?MaCauHoi=' + MaCauHoi;
     }
+}
   
     // Đóng modal khi click ra ngoài
     window.onclick = function(event) {
