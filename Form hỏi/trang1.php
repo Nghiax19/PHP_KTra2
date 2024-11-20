@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khảo Sát Ví Điện Tử</title>
-    <link rel="stylesheet" href="survey.css">
+    <link rel="stylesheet" href="survey1.css">
 </head>
 <body>
     <div class="survey-wrap">
