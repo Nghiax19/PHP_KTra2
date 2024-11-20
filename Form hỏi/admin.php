@@ -18,7 +18,7 @@ if (!isset($_SESSION["user"])) {
     <div class="header" id="cautieude">Quản trị câu hỏi khảo sát</div>
     <div class="sidebar">
         <a href="#">Dashboard</a>
-        <a href="#">Quản lý Câu hỏi</a>
+        <a href="admin.php">Quản lý Câu hỏi</a>
         <a onclick="ketqua()">Kết quả Khảo sát</a>
         <a href="#">Cài đặt</a>
         <a href="#">
